@@ -21,7 +21,7 @@ Goal: Give anyone a fast "risk score" before they click a dangerous link.
 - Environment: Terminal / CLI
 - Concepts: Heuristic Analysis, WHOIS Lookup, URL Parsing
 
-  ## PROJECT STRUCTURE
+## PROJECT STRUCTURE
 
 phish-guard/
 │
