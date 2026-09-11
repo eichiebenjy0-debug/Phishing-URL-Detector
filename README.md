@@ -1,4 +1,5 @@
 # Phishing-URL-Detector
+A beginner-friendly cybersecurity project built with Python that analyzes URLs for common phishing indicators and assigns a suspicion score based on the structure of the URL and the age of its domain.
 
   ## PROJECT OVERVIEW
 
@@ -176,5 +177,6 @@ does NOT guarantee a URL is safe. Always use 2FA and common sense.
 
 ## Author
 Eichie Benjamin
+
 Cybersecurity student / Aspiring Cybersecurity Professional
 Year: 2026
