@@ -1,133 +1,180 @@
 # Phishing-URL-Detector
 
-1. PROJECT OVERVIEW
+  ## PROJECT OVERVIEW
 
-Phishing URL Detector is a Python command-line tool that analyzes
-a URL and gives it a "Suspicion Score" from 0-10.
+Phish Guard CLI is a cybersecurity command-line tool that detects
+phishing URLs using heuristic analysis.
 
-It checks for common phishing tricks like IP addresses, excessive
-subdomains, brand-name hyphens, and brand-new domains. This helps
-users quickly tell if a link is safe or risky before clicking.
+Instead of relying on a database, it scores a URL based on suspicious
+patterns like IP addresses, new domains, and phishing keywords.
+This makes it perfect for students, analysts, and ethical hackers
+practicing on Kali Linux.
 
-Built and tested for Kali Linux / Python 3 environments.
+Goal: Give anyone a fast "risk score" before they click a dangerous link.
 
-2. FEATURES
+  ## TECHNOLOGY USED
 
-[✓] URL Structure Analysis
-    - Detects raw IP addresses instead of domains
-    - Flags excessive subdomains (3+ dots)
-    - Detects hyphens in brand names like pay-pal.com
+- Language: Python 3.8+
+- Libraries: ipaddress, urllib, datetime, socket, whois
+- Platform: Kali Linux, Windows, Mac
+- Environment: Terminal / CLI
+- Concepts: Heuristic Analysis, WHOIS Lookup, URL Parsing
 
-[✓] Keyword Detection
-    - Flags suspicious words: login, verify, signin in the URL
+  ## PROJECT STRUCTURE
 
-[✓] Domain Age Check
-    - Uses WHOIS to check how old a domain is
-    - Gives high risk score if domain is less than 30 days old
-    - Has 5-second timeout to prevent freezing on Kali networks
+phish-guard/
+│
+├── phishing_detector.py <- Main script with all logic
+├── README.txt <- This file
+└── requirements.txt <- python-whois dependency
 
-[✓] Risk Verdict System
-    - Score 0-3 : 🟢 LOW RISK - Looks safe
-    - Score 4-6 : 🟡 MEDIUM RISK - Caution
-    - Score 7-10 : 🔴 HIGH RISK - Do NOT click
+  ## FEATURES
 
-[✓] Detailed Reporting
-    - Prints each reason that increased the score
-    - Clean, easy to read terminal output
+[1] URL Structure Analysis
+    Scans for IP addresses, excessive subdomains, and hyphens.
 
-3. WHAT I LEARNED
+[2] Phishing Keyword Detection
+    Flags dangerous words like "login", "verify", "signin".
 
-While building this project I learned and practiced:
+[3] Domain Age Analysis
+    Uses WHOIS to check if the domain is brand new. New domains = high risk.
 
-1. Python Networking Modules:
-    Used `socket`, `ipaddress`, and `whois` to inspect domains and
-    handle network timeouts safely.
+[4] Network-Safe Execution
+    5-second WHOIS timeout so the tool won't freeze on Kali networks.
 
-2. URL Parsing:
-    Used `urllib.parse.urlparse` to break down a URL into domain,
-    path, and other components for analysis.
+[5] Risk Scoring & Verdict
+    Gives a score from 0-10 and a clear verdict: LOW, MEDIUM, or HIGH RISK.
 
-3. Error Handling for Real Networks:
-    Added try/except blocks and `socket.setdefaulttimeout(5)` so the
-    script doesn't freeze when WHOIS is blocked on Kali.
+[6] Detailed Reason Logging
+    Prints exactly WHY a URL got its score.
 
-4. Scoring/Heuristic Systems:
-    Learned how to build a rule-based scoring system where each
-    suspicious trait adds points to a total risk score.
+  ## HOW IT WORKS
 
-5. Clean CLI UX:
-    Learned to format terminal output with emojis, separators, and
-    clear verdicts so results are easy to understand.
+The tool runs 2 main checks on every URL and adds up the points.
 
-4. RUNNING THE PROJECT
+Step 1: URL Structure Analysis
+Step 2: Domain Age Analysis
+Step 3: Total the score and give a verdict
 
-REQUIREMENTS:
-    Python 3.8+
-    pip install python-whois
+  ## SUSPICION SCORING SYSTEM
 
-INSTALL:
-    pip install python-whois
+Points are added for each red flag found:
 
-RUN:
-    1. Save the code as phishing_detector.py
-    2. Open terminal in the same folder
-    3. Run the command:
+| Check | Points | Reason |
+|---------------------------------|--------|-----------------------------|
+| Uses Raw IP Address | +2 | Phishers hide behind IPs |
+| 3 or More Subdomains | +3 | e.g. a.b.c.paypal.com |
+| Hyphen in Brand Name | +3 | e.g. pay-pal.com |
+| Contains 'login/verify/signin' | +1 | Phishing tactic |
+| Domain Age < 30 Days | +4 | New domains are suspicious |
 
-       python3 phishing_detector.py
+VERDICT SCALE:
+0-3 = 🟢 LOW RISK - Looks safe
+4-6 = 🟡 MEDIUM RISK - Be cautious
+7-10 = 🔴 HIGH RISK - Do NOT click
 
-HOW TO USE:
-    The script currently tests 3 URLs by default in the __main__ block.
-    To test your own URL, edit the last lines and add:
+  ## URL STRUCTURE ANALYSIS
 
-       check_url("https://your-url-here.com")
+This module uses `urllib.parse` to break the URL apart.
+It then checks:
+1. Is the domain an IP? `ipaddress.ip_address()`
+2. How many dots are in the domain? `domain.count('.')`
+3. Is there a hyphen in the main brand name?
+4. Are phishing keywords in the URL? `in url.lower()`
 
-EXAMPLE OUTPUT:
-    🔍 Analyzing: http://paypal-secure.login.xyz.com
+  ## DOMAIN AGE ANALYSIS
 
-      Excessive subdomains (3 dots) (+3)
-      ➖ Contains hyphens in brand name (+3)
-       Contains 'login' or 'verify' (+1)
-      Domain is 12 days old (+4)
+This module uses the `python-whois` library.
+1. It does a WHOIS lookup on the domain
+2. Gets the `creation_date`
+3. Calculates age in days vs today
+4. If < 30 days, it adds 4 points.
+Note: Includes error handling for timeouts and blocked WHOIS on Kali.
 
-    📊 TOTAL SUSPICION SCORE: 11 / 10
-    🔴 VERDICT: HIGH RISK - Do NOT click!
+  ## RUNNING THE PROJECT
 
+PREREQUISITES:
+1. Python 3.8 or higher
+2. Install dependency:
 
-5. HOW IT CAN BE IMPROVED
+   pip install python-whois
 
-Here are ideas to take this project to the next level:
+STEPS TO RUN:
+1. Download `phishing_detector.py`
+2. Open Terminal in the project folder
+3. Run the script:
 
-[1] SSL/TLS Check
-    Add a check for HTTPS and invalid SSL certificates. Most phishing
-    sites use fake HTTPS.
+   python3 phishing_detector.py
 
-[2] Blacklist Integration
-    Connect to Google Safe Browsing API or PhishTank API to check
-    if the URL is already reported.
+CUSTOM USAGE:
+To test your own URL, go to the bottom of the file and add:
 
-[3] Interactive Mode
-    Instead of hardcoded URLs, let the user input URLs in a loop:
-    `Enter URL to scan: `
+   check_url("https://suspicious-link.com")
 
-[4] Export Results
-    Add option to save results to CSV or TXT log file for reports.
+  ## WHAT I LEARNED
 
-[5] Website Content Scan
-    Download the webpage and check for login forms + brand logo
-    mismatch. E.g. URL says "apple" but page shows "bank".
+[1] Practical Web Security
+    Learned how phishers structure malicious URLs to trick users.
 
-[6] GUI Version
-    Build a simple Tkinter or Flask web UI so non-technical users
-    can paste a link and get a score.
+[2] Python for Cybersecurity
+    Used real modules like `whois`, `socket`, and `ipaddress` for OSINT.
 
-[7] Whitelist
-    Add a list of trusted domains like google.com, github.com to
-    auto-mark as safe.
+[3] Building Heuristic Engines
+    Learned to design a rule-based scoring system instead of ML.
 
-NOTES
+[4] Robust Error Handling
+    Learned to handle network failures and timeouts for real-world tools.
 
-Disclaimer: This tool uses heuristics. It does NOT guarantee 100%
-accuracy. Always use common sense and 2FA when dealing with logins.
+[5] CLI Tool Design
+    Learned to make terminal output clean, readable, and actionable.
 
-Built by: Eichie Benjamin
-For: Cybersecurity / Kali Linux Practice
+  ## CYBERSECURITY SKILL GAINED
+
+- Threat Intelligence: Identifying phishing indicators
+- OSINT: Using WHOIS for domain reconnaissance
+- Secure Coding: Input validation and exception handling
+- Risk Assessment: Turning technical findings into a risk score
+- Tooling: Building a practical tool for a SOC analyst workflow
+
+  ## PRACTICAL EXPERIENCE
+
+This project simulates what a Tier-1 SOC analyst does daily:
+"Analyst receives suspicious email link -> Run quick reputation check
+-> Decide if it's safe".
+
+It gave me hands-on experience with:
+1. Breaking down attacker tactics
+2. Writing code that works in restricted networks like Kali
+3. Communicating risk clearly to a non-technical user
+
+  ## HOW IT CAN BE IMPROVED
+
+[1] Live Threat Feeds
+    Integrate Google Safe Browsing API or VirusTotal API
+
+[2] SSL Certificate Check
+    Flag sites with no HTTPS or self-signed certificates
+
+[3] Interactive CLI
+    Loop to ask user: "Enter URL to scan:" instead of hardcoding
+
+[4] Save Reports
+    Export results to.csv or.pdf for documentation
+
+[5] Levenshtein Distance
+    Detect typosquatting: gooogle.com vs google.com
+
+[6] GUI/Web Version
+    Build with Flask or Tkinter for non-technical users
+
+[7] Whitelist/Blacklist
+    Add trusted domains to skip checks and known-bad domains
+
+DISCLAIMER:
+This tool is for educational and defensive purposes only. A low score
+does NOT guarantee a URL is safe. Always use 2FA and common sense.
+
+## Author
+Eichie Benjamin
+Cybersecurity student / Aspiring Cybersecurity Professional
+Year: 2026
